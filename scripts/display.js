@@ -4,8 +4,13 @@ class Display {
         
         if (game.updateHeader) {
             Display.updateHeader();
-            this.setActiveTab();
+            game.setActiveTab();
             game.updateHeader = false;
+        }
+
+        if (game.updateMain) {
+            Display.updateMain();
+            game.updateMain = false;
         }
 
         if (game.updateFooter) {
@@ -22,76 +27,105 @@ class Display {
 
         innerHTML = "";
         
-        for (tab in game.tabs) {
+        for (tab of game.tabs.order) {
             if (!player[tab].unlocked) continue;
             innerHTML += `
                 <button
                     class = 'tabButton'
-                    id = '` + tab + `Tab'
+                    id = '` + tab + `TabButton'
                     onclick = 'game.setActiveTab("` + tab + `");'
-                >` + tab + `</button>`;
+                >` + Utils.getTabValue(tab, "name", tab) + `</button>`;
         }
 
         document.getElementById("tabHeader").innerHTML = innerHTML;
 
     }
 
+    static updateMain() {
+
+        if (game.tabs.order.includes(player.activeTab)) {
+            document.getElementById("content").innerHTML = game.tabs.data[player.activeTab].generateHTML();
+        };
+
+    }
+
     static updateFooter() {
 
-        let foot;
         let innerHTML;
+        let item;
 
         innerHTML = "";
 
-        for (foot of game.footerContent) {
-            switch(foot.type) {
-                case "button":
-                    innerHTML += `
-                        <button
-                            class = 'footerContent'
-                            id = '` + foot.name + `'
-                            onclick = '` + foot.func + `()'
-                        >` + (typeof foot.text == "function" ? foot.text() : foot.text) + `
-                        </button>
-                    `;
-                    break;
-                case "link":
-                    innerHTML += `
-                        <a
-                            class = 'footerContent'
-                            id = '` + foot.name + `'
-                            href=` + foot.link + `
-                            target="_blank"
-                        >` + (typeof foot.text == "function" ? foot.text() : foot.text) + `
-                        </a>
-                    `;
-                    break;
-                case "slider":
-                    innerHTML += `
-                        <span
-                            class = 'footerContent'
-                        >` + `
-                            <span
-                                id = '` + foot.name + `'
-                            >` + (typeof foot.text == "function" ? foot.text() : foot.text) + `
-                            </span>
-                            <input
-                                class = 'footerSlider'
-                                type = 'range'
-                                min = '` + foot.range[0] + `'
-                                max = '` + foot.range[1] + `'
-                                oninput = '` + foot.func + `(this.value)'
-                            ></input>
-                        ` + `
-                        </span>
-                    `;
-                    break;
-            }
+        for (item of game.footerContent) {
+            innerHTML += this.createFooterElement(item);
         }
 
         document.getElementById("settingsFooter").innerHTML = innerHTML;
 
     }
 
+    static createFooterElement(data, expand = false) {
+        
+        let innerHTML;
+        let item;
+
+        switch(data.type) {
+
+            case "expand": 
+                innerHTML = `
+                    <span
+                        class = '` + (expand ? "footerExpand" : "footerContent") + `'
+                    >` + `
+                        <span
+                            id = '` + data.name + `'
+                        >` + Utils.getValue(data.text) + `
+                        </span>
+                `;
+
+                for (item of data.components) {
+                    innerHTML += this.createFooterElement(item, true);
+                }
+
+                return innerHTML + "</span>";
+
+            case "button":
+
+                return `
+                    <button
+                        class = '` + (expand ? "footerExpand" : "footerContent") + ` footerButton'
+                        id = '` + data.name + `'
+                        onclick = '` + data.func + `()'
+                    >` + Utils.getValue(data.text) + `
+                    </button>
+                `;
+                
+            case "link":
+
+                return `
+                    <a
+                        class = '` + (expand ? "footerExpand" : "footerContent") + `'
+                        id = '` + data.name + `'
+                        href=` + data.link + `
+                        target="_blank"
+                    >` + Utils.getValue(data.text) + `
+                    </a>
+                `;
+
+            case "slider":
+
+                return `
+                    <input
+                        class = '` + (expand ? "footerExpand" : "footerContent") + `'
+                        type = 'range'
+                        min = '` + data.range[0] + `'
+                        max = '` + data.range[1] + `'
+                        value = '` + data.value() + `'
+                        oninput = '` + data.func + `(this.value)'
+                    ></input>
+                `;
+
+        }
+
+    }
 
 }

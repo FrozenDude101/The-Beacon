@@ -1,25 +1,34 @@
 class Tab {
 
+    startData = {};
+
     constructor(args = {}) {
 
         let attr;
 
         for (attr in args) {
             switch (attr) {
-                case "startData":
-                    this[attr] = function() { return args[attr]; };
-                    break;
                 default:
-                    this[attr] = args[attr];
+                    this.setValue(attr, args[attr]);
             }
         }
 
     }
 
-    startData() {
+    setValue(attr, value, func = false) {
 
-        return {};
+        if (func) {
+            this[attr] = function() { return value; };
+        } else {
+            this[attr] = value;
+        }
 
     }
+
+    onLoad() {}
+
+    update(diff) {}
+
+    generateHTML() {}
 
 }   

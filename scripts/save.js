@@ -40,7 +40,7 @@ class Save {
         player = {
             id: "FD101/IGJ2021",
 
-            activeTab: "Test",
+            activeTab: game.tabs.order[0],
 
             theme: 0,
 
@@ -48,11 +48,11 @@ class Save {
             saveInterval: 10000,
         };
 
-        for (tab in game.tabs) {
-            player[tab] = game.tabs[tab].startData();
+        for (tab of game.tabs.order) {
+            player[tab] = game.tabs.data[tab].startData;
         }
 
-        return player;
+        return Utils.cloneObject(player);
 
     }
 

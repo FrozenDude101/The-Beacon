@@ -1,0 +1,50 @@
+#story {
+    
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+
+    width: 20em;
+
+    overflow-y: auto;
+
+    color: var(--text-color);
+
+}
+
+#story::-webkit-scrollbar {
+
+    background-color: transparent;
+    
+}
+
+.storyLine {
+
+    margin: 0.5em;
+
+    text-align: center;
+
+}
+
+#lightCanvas {
+
+    width: 20em;
+
+}
+
+#invAct {
+
+    width: 20em;
+
+}
+
+#inventory {
+
+    height: 50%;
+
+}
+
+#actions {
+
+    height: 50%;
+
+}
