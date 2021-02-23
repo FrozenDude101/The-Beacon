@@ -28,11 +28,11 @@ class Utils {
         retArr = [];
         for (item of arr) {
             if (Array.isArray(item)) {
-                retArr[attr].push(Utils.cloneArray(item));
+                retArr.push(Utils.cloneArray(item));
             } else if (typeof item == "object") {
-                retArr[attr].push(Utils.cloneObject(item));
+                retArr.push(Utils.cloneObject(item));
             } else {
-                retArr[attr].push(item);
+                retArr.push(item);
             }
         }
 
@@ -53,7 +53,7 @@ class Utils {
             if (obj2 != undefined && obj2[attr] != undefined) {
                 usedAttr.push(attr);
                 if (Array.isArray(obj1[attr]) && Array.isArray(obj2[attr])) {
-                    obj[attr] = Utils.mergeArrays(obj1[attr], obj2[attr]);
+                    obj[attr] = obj2[attr];
                 } else if (typeof obj1[attr] == "object" && typeof obj2[attr] == "object") {
                     obj[attr] = Utils.mergeObjects(obj1[attr], obj2[attr]);
                 } else {
@@ -76,6 +76,18 @@ class Utils {
     static mergeArrays(arr1, arr2) {
 
         return arr1.concat(arr2);
+
+    }
+
+    static format(number) {
+
+        return number;
+
+    }
+
+    static toTitleCase(string) {
+
+        return string.charAt(0).toUpperCase() + string.slice(1);
 
     }
 

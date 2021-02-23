@@ -1,19 +1,16 @@
 class Display {
 
-    static update() {
+    static update(forceUpdate = false) {
         
-        if (game.updateHeader) {
+        if (game.updateHeader || forceUpdate) {
             Display.updateHeader();
             game.setActiveTab();
             game.updateHeader = false;
         }
 
-        if (game.updateMain) {
-            Display.updateMain();
-            game.updateMain = false;
-        }
+        if (game.tabs.order.includes(player.activeTab)) game.tabs.data[player.activeTab].updateHTML();
 
-        if (game.updateFooter) {
+        if (game.updateFooter || forceUpdate) {
             Display.updateFooter();
             game.updateFooter = false;
         }
@@ -41,14 +38,6 @@ class Display {
 
     }
 
-    static updateMain() {
-
-        if (game.tabs.order.includes(player.activeTab)) {
-            document.getElementById("content").innerHTML = game.tabs.data[player.activeTab].generateHTML();
-        };
-
-    }
-
     static updateFooter() {
 
         let innerHTML;
@@ -58,7 +47,9 @@ class Display {
 
         for (item of game.footerContent) {
             innerHTML += this.createFooterElement(item);
+            innerHTML += "|";
         }
+        innerHTML = innerHTML.slice(0, -1);
 
         document.getElementById("settingsFooter").innerHTML = innerHTML;
 
@@ -75,7 +66,7 @@ class Display {
                 innerHTML = `
                     <span
                         class = '` + (expand ? "footerExpand" : "footerContent") + `'
-                    >` + `
+                    >
                         <span
                             id = '` + data.name + `'
                         >` + Utils.getValue(data.text) + `

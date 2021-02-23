@@ -26,6 +26,7 @@ class Save {
     // Resets the player object.
     static reset() {
 
+        if (!confirm("Are you sure you want to reset your save? This cannot be undone.")) return;
         player = Save.getStartPlayer();
         game.load();
 
@@ -44,7 +45,7 @@ class Save {
 
             theme: 0,
 
-            tickInterval: 50,
+            tickInterval: 34,
             saveInterval: 10000,
         };
 

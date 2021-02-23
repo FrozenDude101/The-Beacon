@@ -15,12 +15,30 @@ class Game {
     unlocked = [];
 
     updateHeader = true;
-    updateMain = true;
     updateFooter = true;
 
+    loaded = false;
     paused = false;
 
     footerContent = [
+        {
+            name: "save",
+            type: "button",
+            text: "Save Game",
+            func: "Save.save",
+        },
+        {
+            name: "load",
+            type: "button",
+            text: "Load Game",
+            func: "Save.load",
+        },
+        {
+            name: "reset",
+            type: "button",
+            text: "Reset Save",
+            func: "Save.reset",
+        },
         {
             name: "tickInterval",
             type: "expand",
@@ -79,13 +97,30 @@ class Game {
         this.createLoops();
         this.changeTheme();
 
-        Display.update();
+        document.getElementById("body").innerHTML = `
+            <header
+                class = "row"
+                id = "tabHeader"
+            ></header>
+            <footer
+                class = "row"
+                id = "settingsFooter">
+            </footer>
+        `;
+
+        for (tab of this.tabs.order) {
+            document.getElementById("body").innerHTML += this.tabs.data[tab].generateHTML();
+        }
 
         this.setActiveTab();
+
+        Display.update(true);
 
         for (tab of this.tabs.order) {
             this.tabs.data[tab].onLoad();
         }
+
+        this.loaded = true;
 
     }
 
@@ -107,7 +142,6 @@ class Game {
         let tab;
 
         diff = (Date.now() - player.lastTick)/1000;
-        player.lastTick = Date.now();
 
         if (game.paused) return;
 
@@ -116,6 +150,8 @@ class Game {
         }
 
         Display.update();
+        
+        player.lastTick = Date.now();
 
     }
 
@@ -174,6 +210,9 @@ class Game {
         this.tabs.order.push(id);
         this.tabs.data[id] = new Tab(data);
         player = Utils.mergeObjects(Save.getStartPlayer(), player);
+        if (this.loaded) {
+            document.getElementById("body").innerHTML += this.tabs.data[id].generateHTML();
+        }
 
     }
 
@@ -184,10 +223,16 @@ class Game {
         let element;
 
         player.activeTab = tab;
+        
         activeTab = document.getElementsByClassName("activeTabButton")[0];
         if (activeTab) activeTab.classList.remove("activeTabButton");
-        element = document.getElementById(tab + "TabButton");
-        if (element) element.classList.add("activeTabButton");
+        activeTab = document.getElementById(tab + "TabButton");
+        if (activeTab) activeTab.classList.add("activeTabButton");
+
+        element = document.getElementById(tab + "Tab");
+        if (element) element.style.display = "none";
+        element = document.getElementById(tab + "Tab");
+        if (element) element.style.display = "flex";
 
         this.updateMain = true;
 

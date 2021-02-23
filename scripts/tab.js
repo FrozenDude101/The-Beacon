@@ -25,6 +25,16 @@ class Tab {
 
     }
 
+    setTimer(type, time, id) {
+
+        player[this.id].timers.push({
+            type: type,
+            time: player.lastTick + time,
+            id: id,
+        })
+
+    }
+
     onLoad() {}
 
     update(diff) {}

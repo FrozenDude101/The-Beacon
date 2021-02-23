@@ -1,7 +1,7 @@
 #story {
-    
-    flex-wrap: nowrap;
-    justify-content: flex-start;
+
+    flex-flow: column-reverse nowrap;
+    justify-content: flex-end;
 
     width: 20em;
 
@@ -25,9 +25,30 @@
 
 }
 
+.storyLine:last-of-type {
+
+    animation: fade-in 1000ms linear 0ms 1;
+
+}
+
+@keyframes newLine {
+    from {
+        margin-top: -1.5em;
+    }
+    to {
+        margin-top: 0.5em;
+    }
+}
+
+.storyLine:nth-last-child(2) {
+
+    animation: newLine 1000ms ease-in-out 0ms 1;
+
+}
+
 #lightCanvas {
 
-    width: 20em;
+    width: 10em;
 
 }
 
@@ -39,12 +60,71 @@
 
 #inventory {
 
+    justify-content: flex-start;
+    align-items: flex-start;
+
     height: 50%;
+    width: 100%;
+
+}
+
+.item {
+
+    color: var(--text-color);
 
 }
 
 #actions {
 
+    justify-content: flex-start;
+
     height: 50%;
+    width: 100%;
+
+}
+
+.actionContainer {
+
+    width: 100%;
+
+    margin: 0.5em;
+
+}
+
+.actionContainer:first-of-type {
+
+    margin-top: 0px;
+
+}
+
+.action {
+
+    position: relative;
+
+    width: 100%;
+
+    margin: 0.25em;
+    outline: none;
+    border: 2px solid var(--text-color);
+    border-radius: 0.5em;
+    padding: 0.5em 1em;
+
+    background-color: transparent;
+
+    font-family: "Times New Roman", Times, serif;
+    font-size: 1em;
+
+    color: var(--text-color);
+
+    transition-duration: 500ms;
+
+    animation: fade-in 1000ms linear 0ms 1;
+    
+}
+
+.action:hover:not([disabled]) {
+
+    background-color: var(--action-highlight);
+    box-shadow: 0em 0em 1em var(--text-color);
 
 }

@@ -1,3 +1,18 @@
+@keyframes fade-in {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+* {
+
+    letter-spacing: 0.05em;
+
+}
+
 html {
 
     height: 100%;
@@ -45,6 +60,7 @@ body {
 #tabHeader {
 
     flex-shrink: 0;
+    order: 0;
 
     margin-bottom: 2em;
     
@@ -64,15 +80,12 @@ body {
     border: none;
     padding: none;
 
-    border-radius: 0.5em;
-
     background-color: transparent;
 
     font-family: "Times New Roman", Times, serif;
     font-size: 2em;
 
     color: var(--text-color);
-    text-decoration: none;
     border-bottom: 2px solid transparent;
     border-radius: 0.5em;
 
@@ -87,18 +100,41 @@ body {
 
 }
 
-#content {
+.content {
 
+    display: none;
+
+    order: 0;
     flex-grow: 1;
 
     height: 0px;
 
 }
 
+.fill {
+
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    z-index: -1;
+
+    height: calc(100% + 4px);
+    width: 0%;
+
+    border-radius: inherit;
+
+    background: var(--accent-1);
+
+    transition-property: width;
+
+}
+
 #settingsFooter {
 
-    flex-shrink: 0;
     justify-content: flex-end;
+    align-items: baseline;
+    flex-shrink: 0;
+    order: 2;
 
     margin-top: 2em;
 
