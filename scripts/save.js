@@ -45,6 +45,7 @@ class Save {
 
             theme: 0,
 
+            lastTick: Date.now(),
             tickInterval: 34,
             saveInterval: 10000,
         };

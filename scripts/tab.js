@@ -25,12 +25,12 @@ class Tab {
 
     }
 
-    setTimer(type, time, id) {
+    setTimer(type, time, data) {
 
         player[this.id].timers.push({
             type: type,
             time: player.lastTick + time,
-            id: id,
+            data: data,
         })
 
     }

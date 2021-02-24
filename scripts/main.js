@@ -25,19 +25,6 @@ game.addTab("light", {
     id: "light",
     inventoryOrder: ["wood", "matches"],
 
-    name() {
-
-        let name;
-
-        if (player.light.state >= 80) {
-            name = "A Small Campfire";
-        } else {
-            name = "A Snow Filled Clearing"
-        }
-
-        return name;
-    },
-
     startData: {
         unlocked: true,
 
@@ -53,52 +40,91 @@ game.addTab("light", {
         },
 
         story: [],
+        actions: [],
 
         state: 0,
-        actions: ["", "", ""],
+        light: 0,
         timers: [
             {
-                type: "state",
+                type: "story",
                 time: 0,
-                id: 0,
+                data: 0,
             },
         ],
+
+        flameTime: 0,
+    },
+
+    name() {
+
+        let name;
+
+        if (player.light.state >= 80) {
+            name = "A Small Campfire";
+        } else {
+            name = "A Snow Filled Clearing"
+        }
+
+        return name;
     },
 
     onLoad() {
 
         let timer;
         let clone;
+        let action;
 
         clone = Utils.cloneArray(player.light.timers);
         for (timer of clone) {
-            if (timer.type == "action") {
+            if (timer.type == "doAction" || timer.type == "function") {
                 player.light.timers.splice(clone.indexOf(timer), 1);
             }
+        }
+
+        this.addStory("");
+
+        this.updateHTML();
+
+        for (action of player.light.actions) {
+            this.setAction(action);
         }
 
     },
 
     update(diff) {
 
+        let i;
         let timer;
-        let clone;
 
-        clone = Utils.cloneArray(player.light.timers);
-        for (timer of clone) {
+        for (let i = 0; i < player.light.timers.length; i ++) {
+            timer = player.light.timers[i];
             if (player.lastTick > timer.time) {
                 switch (timer.type) {
-                    case "state":
-                        this.setState(timer.id);
+                    case "story":
+                        player.light.state = timer.data;
+                        this.setState(timer.data);
                         break;
-                    case "action":
-                        this.doAction(timer.id);
+                    case "line":
+                        this.addStory(timer.data);
+                        break;
+                    case "setAction":
+                        this.setAction(timer.data);
+                        break;
+                    case "createAction":
+                        this.createAction(timer.data.id, timer.data.slot, timer.data.text, timer.data.time);
+                        break;
+                    case "deleteAction":
+                        this.deleteAction(timer.data);
+                        break;
+                    case "doAction":
+                        this.doAction(timer.data);
                         break;
                     case "function":
-                        timer.id();
+                        timer.data();
                         break;
                 }
-                player.light.timers.splice(clone.indexOf(timer), 1);
+                player.light.timers.splice(player.light.timers.indexOf(timer), 1);
+                i --;
             }
         }
 
@@ -108,7 +134,7 @@ game.addTab("light", {
 
         let story, line;
         let inventory, item;
-        let actions, HTML;
+        let actions;
 
         story = "";
         for (line of player.light.story) {
@@ -137,14 +163,12 @@ game.addTab("light", {
         }
 
         actions = "";
-        for (action = 0; action < player.light.actions.length; action ++) {
-            HTML = this.createAction(player.light.actions[action]).HTML;
-            if (!HTML) HTML = "";
+        for (action = 0; action < 3; action ++) {
             actions += `
                 <div
                     class = "actionContainer"
                     id = "action` + action + `"
-                >` + HTML + `
+                >
                 </div>
             `;
         }
@@ -167,231 +191,224 @@ game.addTab("light", {
         for (item of this.inventoryOrder) {
             if (player.light.inventory[item].amount > 0) player.light.inventory[item].unlocked = true;
             document.getElementById(item  + "Div").style.display = (player.light.inventory[item].unlocked ? "" : "none");
-            document.getElementById(item  + "Amount").innerHTML = Utils.format(player.light.inventory[item].amount);
+            document.getElementById(item  + "Amount").textContent = Utils.format(player.light.inventory[item].amount);
         }
 
     },
 
     addStory(line) {
 
-        player.light.story.push(line);
-        document.getElementById("story").innerHTML += `
-            <span
-                class = 'storyLine'
-            >` + line + `
-            </span>
-        `;
+        let story;
+        let element;
+
+        story = document.getElementById("story");
+
+        if (line) {
+            player.light.story.push(line);
+            story.innerHTML += `
+                <span
+                    class = 'storyLine'
+                >` + line + `
+                </span>
+            `;
+
+            element = story.lastElementChild.previousElementSibling;
+            if (element) {
+                element.style.transitionDuration = "0ms";
+                element.style.marginTop = "calc(-0.5em - " + story.lastElementChild.scrollHeight + "px)";
+                this.setTimer("function", 0, function() {
+                    document.getElementById("story").lastElementChild.previousElementSibling.style.transitionDuration = "500ms";
+                    document.getElementById("story").lastElementChild.previousElementSibling.style.marginTop = "0.5em";
+                });
+            }
+
+        }
+        
+        for (element of story.children) {
+
+            element.style.opacity = Math.min(1, -2*(element.offsetTop/story.clientHeight)+2);
+            if (element.style.opacity <= 0) {
+                player.light.story.shift();
+            }
+
+        }
 
     },
 
-    setState(state = player.light.state) {
-
-        let action;
+    setState(state) {
 
         switch (state) {
+
             case 0:
-                this.setTimer("state", 2000, 10);
+                this.setTimer("story", 2500, 10);
                 break;
             case 10:
                 this.addStory("I don't know how much longer I can go on for.");
-                this.setTimer("state", 2000, 20);
+                this.setTimer("story", 2500, 20);
                 break;
             case 20:
                 this.addStory("I need to stop and rest.");
-                this.setTimer("state", 2000, 30);
+                this.setTimer("story", 2500, 30);
                 break;
             case 30:
-                this.addStory("Should make a fire before night comes.");
-                this.setTimer("state", 2000, 31);
+                this.addStory("I should make a fire before nightfall.");
+                this.setTimer("story", 2500, 40);
                 break;
-            case 31:
-                this.addStory("I'll freeze to death otherwise.");
-                this.setTimer("state", 2000, 40);
+            case 40:
+                this.addStory("Can't risk another encounter.");
+                this.setTimer("story", 2500, 50);
                 break;
-            
             case 50:
-                this.addStory("I hope this isn't too damp.");
-                this.setTimer("state", 2000, 60);
+                this.addStory("I should be able to find some wood in the forest.");
+                this.setAction(50);
                 break;
+
             case 60:
-                this.addStory("Only have a few matches left.");
+                this.addStory("I hope this wood isn't too damp.");
+                this.setTimer("story", 2500, 70);
+                break;
+            case 70:
+                this.addStory("Only have a few matches.");
                 player.light.inventory.matches.amount = 4;
-                this.setTimer("state", 2000, 70);
+                this.setAction(70);
                 break;
 
-            case 80:
-                game.updateHeader = true;
-                this.addStory("The wood bursts into flames.");
-                this.deleteAction(1);
-                this.setTimer("state", 2000, 90);
-                break;
-            case 90:
-                this.addStory("Light floods the clearing, but barely illuminates the forest.");
-                this.setTimer("state", 5000, 100);
-                break;
-            case 100:
-                this.addStory("Several pairs of eyes peeks out of the darkness. Thank God I made the fire in time.");
-                this.setTimer("state", 5000, 110);
-                break;
-            case 110:
-                this.addStory("I must ensure the fire lasts all night.");
-                break;
-        }
-
-        player.light.state = state;
-        action = this.createAction(state);
-        if (action) {
-            document.getElementById("action" + action.slot).innerHTML = action.HTML;
         }
 
     },
 
-    createAction(action) {
+    setAction(action) {
 
-        let text;
-        let slot;
+        let data;
 
-        switch (action.toString()) {
-            case "40":
-                text = "Forage for wood.";
-                slot = 0;
+        switch (action) {
+            case 50:
+                data = {slot: 0, text: "Forage for wood.", time: 5000};
                 break;
-            case "70":
-                text = "Light the fire.";
-                slot = 1;
+            case 70:
+                data = {slot: 1, text: "Light the fire.", time: 2000};
                 break;
-            case "110":
-                text = "Stoke the fire.";
-                slot = 1;
+            default:
+                console.log("Invalid Action ID '" + action + "'");
+                return;
+        }
+        data.id = action;
+
+        if (game.loaded) player.light.actions.push(action);
+        if (!document.getElementById("action" + data.slot).children[0]) {
+            this.createAction(action, data.slot, data.text, data.time);
+        } else {
+            this.deleteAction(data.slot);
+            this.setTimer("createAction", 500, data)
         }
 
-        if (text) {
-            if (player.light.actions[slot] != action) {
-                player.light.actions[slot] = action;
-            }
-            return {
-                slot: slot,
-                HTML:`
-                    <button
-                        class = "action"
-                        id = "` + action + `B"
-                        onclick = "game.tabs.data.light.doAction('` + action + `A')"
-                    >` + text + `
-                        <div
-                            class = "fill"
-                            id = "` + action + `F"
-                        >
-                        </div>
-                    </button>
-                `,
-            }
-        }
+    },
 
-        return false;
+    createAction(id, slot, text, time) {
+
+        document.getElementById("action" + slot).innerHTML = `
+            <button
+                class = "action"
+                id = "` + id + `A"
+                onclick = "game.tabs.data.light.doAction(` + id + `)"
+            >` + text + `
+                <div
+                    class = "fill"
+                    id = "` + id + `F"
+                </div>
+            </button>
+        `
+        document.getElementById(id + "A").state = 0;
+        document.getElementById(id + "A").time = time;
 
     },
 
     deleteAction(slot) {
 
-        player.light.actions[slot] = "";
-        document.getElementById("action" + slot).firstElementChild.disabled = true;
-        document.getElementById("action" + slot).firstElementChild.style.opacity = 0;
-        this.setTimer("function", 500, function() { document.getElementById("action" + slot).innerHTML = ""; });
+        let element;
+
+        element = document.getElementById("action" + slot).children[0];
+        element.disabled = true;
+        element.style.transitionDuration = "500ms";
+        element.style.opacity = 0;
+        this.setTimer("function", 500, function() {
+            document.getElementById("action" + slot).innerHTML = "";
+        })
 
     },
 
     doAction(action) {
 
-        let event;
+        let button, fill;
 
-        switch (action) {
-            case "40A":
-                if (document.getElementById("40B").disabled) break;
-                document.getElementById("40B").disabled = true;
-                document.getElementById("40F").style.transition = "5000ms linear";
-                document.getElementById("40F").style.width = "calc(100% + 4px)";
-                this.setTimer("action", 5000, "40B");
+        button = document.getElementById(action + "A");
+        fill = document.getElementById(action + "F");
+
+        if (!button || !fill) return;
+
+        switch (button.state) {
+
+            case 0:
+                button.disabled = true;
+                fill.style.transition = button.time + "ms linear";
+                fill.style.width = "calc(100% + 4px)";
+                this.setTimer("doAction", 0, action);
+                this.setTimer("doAction", button.time, action);
                 break;
-            case "40B":
-                document.getElementById("40F").style.transition = "500ms ease-in-out";
-                document.getElementById("40F").style.width = "0px";
-                player.light.inventory.wood.amount += 1;
-                this.setTimer("action", 500, "40C");
-                if (player.light.state == 40) this.setTimer("state", 2000, 50);
+            case 2:
+                fill.style.transition = "500ms ease-in-out";
+                fill.style.width = "0px";
+                this.setTimer("doAction", 0, action);
+                this.setTimer("doAction", 500, action);
                 break;
-            case "40C":
-                document.getElementById("40B").disabled = false;
+            case 4:
+                button.disabled = false;
                 break;
 
-            case "70A":
-                if (document.getElementById("70B").disabled) break;
-                document.getElementById("70B").disabled = true;
-                document.getElementById("70F").style.transition = "2000ms linear";
-                document.getElementById("70F").style.width = "calc(100% + 4px)";
-                switch (player.light.inventory.matches.amount) {
-                    case 4:
-                        event = "70B";
-                        break;
-                    case 3:
-                        event = (Math.random() > 0.5 ? "70C" : "70F");
-                        break;
-                    case 2:
-                        event = (Math.random() > 0.5 ? "70D" : "70F");
-                        break;
-                    case 1:
-                        event = "70F";
+            case 1:
+                switch (action) {
+                    case 70:
+                        button.flag = player.light.inventory.matches.amount == 0;
+                        if (player.light.inventory.matches.amount) {
+                            player.light.inventory.matches.amount -= 1;
+                            if (player.light.inventory.matches.amount == 0) {
+                                this.setTimer("line", 500, "My last match.");
+                            }
+                        } else {
+                            this.setTimer("line", 500, "Think I've got some matches round here somewhere.");
+                        }
                         break;
                 }
-                player.light.inventory.matches.amount -= 1;
-                this.setTimer("action", 2000, event);
-                break;
-            case "70B":
-                document.getElementById("70F").style.transition = "500ms ease-in-out";
-                document.getElementById("70F").style.width = "0px";
-                this.addStory("Damn! It snapped!");
-                this.setTimer("action", 500, "70E");
-                break;
-            case "70C":
-                document.getElementById("70F").style.transition = "500ms ease-in-out";
-                document.getElementById("70F").style.width = "0px";
-                this.addStory("It won't catch!");
-                this.setTimer("action", 500, "70E");
-                break;
-            case "70D":
-                document.getElementById("70F").style.transition = "500ms ease-in-out";
-                document.getElementById("70F").style.width = "0px";
-                this.addStory("My last match.");
-                this.setTimer("action", 500, "70E");
-                break;
-            case "70E":
-                document.getElementById("70B").disabled = false;
-                break;
-            case "70F":
-                document.getElementById("70F").style.transition = "500ms ease-in-out";
-                document.getElementById("70F").style.width = "0px";
-                player.light.inventory.wood.amount -= 1;
-                this.setTimer("state", 0, 80);
                 break;
 
-            case "110A":
-                if (document.getElementById("110B").disabled) break;
-                document.getElementById("110B").disabled = true;
-                document.getElementById("110F").style.transition = "10000ms linear";
-                document.getElementById("110F").style.width = "calc(100% + 4px)";
-                player.light.inventory.wood.amount -= 1;
-                this.setTimer("action", 10000, "110B");
-                break;
-            case "110B":
-                document.getElementById("110F").style.transition = "500ms ease-in-out";
-                document.getElementById("110F").style.width = "0px";
-                this.setTimer("action", 500, "110C");
-                break;
-            case "110C":
-                document.getElementById("110B").disabled = false;
+            case 3:
+                switch (action) {
+                    case 50:
+                        player.light.inventory.wood.amount += 1;
+                        if (player.light.state == 50) this.setTimer("story", 500, 60);
+                        break;
+                    case 70:
+                        if (button.flag) {
+                            player.light.inventory.matches.amount += Math.floor(Math.random()*3) + 1;
+                            this.setTimer("line", 500, "Found a few.");
+                        } else if (player.light.inventory.matches.amount == 0 || Math.random() > 0.5) {
+                            player.light.inventory.wood.amount -= 1;
+                            this.deleteAction(1);
+                            this.setTimer("line", 500, "The wood bursts into flames.");
+                            if (player.light.state == 70) this.setTimer("story", 500, 80);
+                        } else {
+                            this.setTimer("line", 500, 
+                                ["Damn! It snapped!", "It won't catch!", "The wind blew it out!"][Math.floor(Math.random()*3)]);
+                        }
+                        break;
+                }
                 break;
 
         }
 
-    },
+        button.state += 1;
+        button.state %= 5;
+
+    }
 
 });

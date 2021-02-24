@@ -11,38 +11,21 @@
 
 }
 
-#story::-webkit-scrollbar {
-
-    background-color: transparent;
-    
-}
-
 .storyLine {
 
     margin: 0.5em;
 
     text-align: center;
 
+    transition-duration: 500ms;
+
 }
 
 .storyLine:last-of-type {
 
+    margin-top: 0px;
+
     animation: fade-in 1000ms linear 0ms 1;
-
-}
-
-@keyframes newLine {
-    from {
-        margin-top: -1.5em;
-    }
-    to {
-        margin-top: 0.5em;
-    }
-}
-
-.storyLine:nth-last-child(2) {
-
-    animation: newLine 1000ms ease-in-out 0ms 1;
 
 }
 
@@ -71,6 +54,8 @@
 .item {
 
     color: var(--text-color);
+
+    animation: fade-in 1000ms linear 0ms 1;
 
 }
 

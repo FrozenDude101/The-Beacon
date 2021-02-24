@@ -24,13 +24,13 @@ class Game {
         {
             name: "save",
             type: "button",
-            text: "Save Game",
+            text: "Export Game",
             func: "Save.save",
         },
         {
             name: "load",
             type: "button",
-            text: "Load Game",
+            text: "Import Game",
             func: "Save.load",
         },
         {
@@ -49,7 +49,7 @@ class Game {
                 {
                     name: "",
                     type: "slider",
-                    range: [1, 30],
+                    range: [5, 30],
                     func: "game.setTickInterval",
                     value() {
                         return Math.ceil(1000/player.tickInterval);
@@ -61,13 +61,13 @@ class Game {
             name: "saveInterval",
             type: "expand",
             text() {
-                return "Autosave every " + Math.ceil(player.saveInterval/1000) + "s";
+                return (player.saveInterval == 0 ? "Autosave (Off)" : "Autosave every " + Math.ceil(player.saveInterval/1000) + "s");
             },
             components: [
                 {
                     name: "",
                     type: "slider",
-                    range: [1, 10],
+                    range: [0, 10],
                     func: "game.setSaveInterval",
                     value() {
                         return Math.ceil(player.saveInterval/1000);
@@ -93,6 +93,8 @@ class Game {
     load() {
 
         let tab;
+
+        this.loaded = false;
 
         this.createLoops();
         this.changeTheme();
@@ -121,7 +123,6 @@ class Game {
         }
 
         this.loaded = true;
-
     }
 
     // Resets/Creates the save and main loops.
@@ -131,7 +132,7 @@ class Game {
         clearInterval(this.loops.save);
 
         this.loops.tick = setInterval(Game.loop, player.tickInterval);
-        this.loops.save = setInterval(Save.save, player.saveInterval);
+        this.loops.save = (player.saveInterval ? setInterval(Save.save, player.saveInterval) : null);
 
     }
 
@@ -166,7 +167,7 @@ class Game {
     setSaveInterval(value) {
 
         player.saveInterval = value*1000;
-        document.getElementById("saveInterval").innerHTML = "Autosave every " + Math.ceil(player.saveInterval/1000) + "s";
+        document.getElementById("saveInterval").innerHTML = (player.saveInterval == 0 ? "Autosave (Off)" : "Autosave every " + Math.ceil(player.saveInterval/1000) + "s");
         this.createLoops();
 
     }
