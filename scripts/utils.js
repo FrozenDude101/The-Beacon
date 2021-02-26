@@ -112,4 +112,18 @@ class Utils {
 
     }
 
+    static formatCost(obj) {
+
+        let ret;
+        let attr;
+
+        ret = "";
+        for (attr in obj) {
+            ret += obj[attr] + " " + Utils.toTitleCase(attr) + ", ";
+        }
+
+        return ret.slice(0, -2);
+
+    }
+
 }

@@ -24,19 +24,19 @@ class Game {
         {
             name: "save",
             type: "button",
-            text: "Export Game",
+            text: "Export",
             func: "Save.save",
         },
         {
             name: "load",
             type: "button",
-            text: "Import Game",
+            text: "Import",
             func: "Save.load",
         },
         {
             name: "reset",
             type: "button",
-            text: "Reset Save",
+            text: "Reset",
             func: "Save.reset",
         },
         {
@@ -84,7 +84,13 @@ class Game {
         {
             name: "discordLink",
             type: "link",
-            text: "IGJ 2021",
+            text: "IGJ 2021 Discord",
+            link: "https://discord.gg/4JdncDzr",
+        },
+        {
+            name: "discordLink2",
+            type: "link",
+            text: "The Beacon Discord",
             link: "https://discord.gg/4JdncDzr",
         },
     ];
@@ -104,6 +110,9 @@ class Game {
                 class = "row"
                 id = "tabHeader"
             ></header>
+            <main
+                id = "content"
+            ></main>
             <footer
                 class = "row"
                 id = "settingsFooter">
@@ -111,12 +120,12 @@ class Game {
         `;
 
         for (tab of this.tabs.order) {
-            document.getElementById("body").innerHTML += this.tabs.data[tab].generateHTML();
+            document.getElementById("content").innerHTML += this.tabs.data[tab].generateHTML();
         }
 
-        this.setActiveTab();
-
         Display.update(true);
+
+        this.setActiveTab();
 
         for (tab of this.tabs.order) {
             this.tabs.data[tab].onLoad();
@@ -147,6 +156,12 @@ class Game {
         if (game.paused) return;
 
         for (tab of game.tabs.order) {
+            if (player[tab].highlight && tab != player.activeTab) {
+                document.getElementById(tab + "TabButton").style.textShadow = "0em 0em 1em var(--text-color)";
+            } else {
+                player[tab].highlight = false;
+                document.getElementById(tab + "TabButton").style.textShadow = "";
+            }
             game.tabs.data[tab].update(diff);
         }
 
@@ -222,18 +237,28 @@ class Game {
 
         let activeTab;
         let element;
-
-        player.activeTab = tab;
         
         activeTab = document.getElementsByClassName("activeTabButton")[0];
         if (activeTab) activeTab.classList.remove("activeTabButton");
         activeTab = document.getElementById(tab + "TabButton");
         if (activeTab) activeTab.classList.add("activeTabButton");
 
+        element = document.getElementById(player.activeTab + "Tab");
+        if (element) {
+            element.style.zIndex = 0;
+            element.style.opacity = 0;
+            element.style.transition = "1000ms ease-in-out";
+            element.style.left = "-100vw";
+        }
         element = document.getElementById(tab + "Tab");
-        if (element) element.style.display = "none";
-        element = document.getElementById(tab + "Tab");
-        if (element) element.style.display = "flex";
+        if (element) {
+            element.style.zIndex = 1;
+            element.style.opacity = 1;
+            element.style.transition = "1000ms ease-in-out";
+            element.style.left = "0px";
+        }
+
+        player.activeTab = tab;
 
         this.updateMain = true;
 

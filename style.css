@@ -55,6 +55,8 @@ body {
     
     background-color: var(--background-color);
 
+    overflow: hidden;
+
 }
 
 #tabHeader {
@@ -89,7 +91,7 @@ body {
     border-bottom: 2px solid transparent;
     border-radius: 0.5em;
 
-    transition: 250ms;
+    transition: 500ms;
 
 }
 
@@ -100,14 +102,30 @@ body {
 
 }
 
-.content {
-
-    display: none;
+#content {
 
     order: 0;
     flex-grow: 1;
 
     height: 0px;
+    width: 100%;
+
+    position: relative;
+
+}
+
+.content {
+
+    position: absolute;
+    top: 0px;
+    left: -100vw;
+
+    height: 100%;
+    width: 100%;
+
+    background-color: var(--background-color);
+    
+    transition: 2500ms linear;
 
 }
 

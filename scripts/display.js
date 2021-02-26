@@ -4,7 +4,6 @@ class Display {
         
         if (game.updateHeader || forceUpdate) {
             Display.updateHeader();
-            game.setActiveTab();
             game.updateHeader = false;
         }
 

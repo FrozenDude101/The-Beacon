@@ -5,6 +5,8 @@
 
     width: 20em;
 
+    margin-right: 4em;
+
     overflow-y: auto;
 
     color: var(--text-color);
@@ -39,6 +41,8 @@
 
     width: 20em;
 
+    margin-left: 4em;
+
 }
 
 #inventory {
@@ -72,13 +76,7 @@
 
     width: 100%;
 
-    margin: 0.5em;
-
-}
-
-.actionContainer:first-of-type {
-
-    margin-top: 0px;
+    margin-bottom: 1em;
 
 }
 
@@ -88,11 +86,11 @@
 
     width: 100%;
 
-    margin: 0.25em;
+    margin: none;
     outline: none;
     border: 2px solid var(--text-color);
     border-radius: 0.5em;
-    padding: 0.5em 1em;
+    padding: 0.5em 0.5em;
 
     background-color: transparent;
 

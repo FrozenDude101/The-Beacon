@@ -35,10 +35,4 @@ class Tab {
 
     }
 
-    onLoad() {}
-
-    update(diff) {}
-
-    generateHTML() {}
-
 }   
