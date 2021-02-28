@@ -85,13 +85,13 @@ class Game {
             name: "discordLink",
             type: "link",
             text: "IGJ 2021 Discord",
-            link: "https://discord.gg/4JdncDzr",
+            link: "https://discord.gg/NbKVeY4v5S",
         },
         {
             name: "discordLink2",
             type: "link",
             text: "The Beacon Discord",
-            link: "https://discord.gg/4JdncDzr",
+            link: "https://discord.gg/YWUqwBSb9M",
         },
     ];
 
@@ -155,17 +155,18 @@ class Game {
 
         if (game.paused) return;
 
+        Display.update();
+
         for (tab of game.tabs.order) {
-            if (player[tab].highlight && tab != player.activeTab) {
+            if (!document.getElementById(tab + "TabButton")) continue;
+            if (player[tab].highlight && player[tab].unlocked && tab != player.activeTab) {
                 document.getElementById(tab + "TabButton").style.textShadow = "0em 0em 1em var(--text-color)";
-            } else {
+            } else if (player[tab].unlocked) {
                 player[tab].highlight = false;
                 document.getElementById(tab + "TabButton").style.textShadow = "";
             }
             game.tabs.data[tab].update(diff);
         }
-
-        Display.update();
         
         player.lastTick = Date.now();
 

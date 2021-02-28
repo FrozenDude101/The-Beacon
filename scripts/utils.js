@@ -119,11 +119,22 @@ class Utils {
 
         ret = "";
         for (attr in obj) {
+            if (!obj[attr]) continue;
             ret += obj[attr] + " " + Utils.toTitleCase(attr) + ", ";
         }
 
         return ret.slice(0, -2);
 
     }
+
+    static formatTime(s) {
+        s = s/1000;
+        if (s < 60) return  Math.floor(s) + "s"
+        else if (s < 3600) return Math.floor(s / 60) + "m " + Math.floor(s % 60) + "s"
+        else if (s < 86400) return Math.floor(s / 3600) + "h " + (Math.floor(s / 60) % 60) + "m " + Math.floor(s % 60) + "s"
+        else if (s < 31536000) return (Math.floor(s / 84600) % 365) + "d " + (Math.floor(s / 3600) % 24) + "h " + (Math.floor(s / 60) % 60) + "m " + Math.floor(s % 60) + "s"
+        else return Math.floor(s / 31536000) + "y " + (Math.floor(s / 84600) % 365) + "d " + (Math.floor(s / 3600) % 24) + "h " + (Math.floor(s / 60) % 60) + "m " + Math.floor(s % 60) + "s"
+    }
+    // Stolen from TMT.
 
 }

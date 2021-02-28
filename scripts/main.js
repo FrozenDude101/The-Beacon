@@ -64,7 +64,8 @@ game.addTab("light", {
 
     name() {
 
-        if (player.light.state >= 70) return "The Campfire";
+        if (player.light.state >= 440) return "A Ruined Campsite";
+        else if (player.light.state >= 70) return "The Campfire";
         else return "A Snow Filled Clearing";
 
     },
@@ -113,6 +114,8 @@ game.addTab("light", {
             if (player.lastTick > timer.time) {
                 switch (timer.type) {
                     case "story":
+                        if (this.skipLineTimers) continue;
+                        this.skipLineTimers = 1;
                         player.light.state = timer.data;
                         this.setState(timer.data);
                         break;
@@ -140,9 +143,11 @@ game.addTab("light", {
                         break;
                 }
                 player.light.timers.splice(player.light.timers.indexOf(timer), 1);
-                i --;
+                i--;
             }
         }
+
+        if (player.light.state >= 430) return;
 
         flameLeft = player.light.flameTime - player.lastTick;
         if (player.light.light != 0 && 0 >= flameLeft) {
@@ -225,7 +230,7 @@ game.addTab("light", {
         }
 
         actions = "";
-        for (action = 0; action < 3; action ++) {
+        for (action = 0; action < 4; action ++) {
             actions += `
                 <div
                     class = "actionContainer"
@@ -262,11 +267,13 @@ game.addTab("light", {
 
     },
 
-    addStory(line) {
+    addStory(line, end = false) {
 
         let story;
         let element;
         let removed;
+
+        if (player.light.state >= 430 && !end) return;
 
         story = document.getElementById("story");
 
@@ -364,7 +371,7 @@ game.addTab("light", {
                 this.setTimer("story", 2500, 130);
                 break;
             case 130:
-                this.addStory("3 bedraggled people stumble out. The first I've seen in weeks.");
+                this.addStory("3 bedraggled people stumble out. The first I've seen in days.");
                 this.setTimer("story", 2500, 140);
                 break;
             case 140:
@@ -377,9 +384,9 @@ game.addTab("light", {
                 break;
             case 160:
                 this.addStory("More hands are always useful.");
-                this.addItem("wood", Math.floor(Math.random()*3) + 1, true);
-                this.addItem("cloth", Math.floor(Math.random()*3) + 5, true);
-                this.addItem("matches", Math.floor(Math.random()*3) + 1, true);
+                this.addItem("wood", Math.floor(Math.random()*3) + 1);
+                this.addItem("cloth", Math.floor(Math.random()*3) + 5);
+                this.addItem("matches", Math.floor(Math.random()*3) + 1);
                 player.clearing.unlocked = true;
                 player.clearing.workers.free += 3;
                 game.updateHeader = true;
@@ -437,6 +444,227 @@ game.addTab("light", {
                 player.clearing.highlight = true;
                 player.clearing.buildings.storage.unlocked = true;
                 break;
+        
+            case 290:
+                this.addStory("As if on cue, another survivor stumbles in.");
+                this.setTimer("story", 2500, 300);
+                player.clearing.workers.free += 1;
+                break;
+            case 300:
+                this.addStory("They look much more prepared.");
+                this.setTimer("story", 2500, 310);
+                break;
+            case 310:
+                this.addStory("Perhaps they could join in on scavenging supplies.");
+                player.clearing.workers.explorer.unlocked = true;
+                player.clearing.highlight = true;
+                break;
+        
+            case 320:
+                this.addItem("wood", -Math.ceil(player.light.inventory.wood.amount/2));
+                this.addItem("metal", -Math.ceil(player.light.inventory.metal.amount/2));
+                this.addItem("cloth", -Math.ceil(player.light.inventory.cloth.amount/2));
+                this.addItem("matches", -Math.ceil(player.light.inventory.matches.amount/2));
+                player.light.light = 0;
+                player.light.flameTime = 0;
+                this.addStory("The camp is in ruins.");
+                this.setTimer("story", 2500, 330);
+                break;
+            case 330:
+                this.addStory("It must have been attacked while I was gone.");
+                this.setTimer("story", 2500, 340);
+                break;
+            case 340:
+                this.addStory("The fire must not have been bright enough.");
+                this.setTimer("story", 5000, 350);
+                break;
+            case 350:
+                this.addStory("I should build some defenses.");
+                this.setTimer("story", 2500, 360);
+                break;
+            case 360:
+                this.addStory("All this scrap metal could made a crude wall.");
+                this.setTimer("story", 2500, 370);
+                break;
+            case 370:
+                this.addStory("Hopefully it will be enough in an emergency.");
+                player.clearing.buildings.wall.unlocked = true;
+                player.clearing.highlight = true;
+                break;
+        
+            case 380:
+                this.addStory("Scratch marks cover the wall.");
+                this.setTimer("story", 2500, 390);
+                break;
+            case 390:
+                this.addStory("It barely survived.");
+                this.setTimer("story", 2500, 400);
+                break;
+            case 400:
+                this.addStory("I doubt it will survive the night.");
+                break;
+
+            case 410:
+                this.addStory("Much stronger now.");
+                this.setTimer("story", 2500, 420);
+                break;
+            case 420:
+                this.addStory("If the fire is maintained, the night should be safe.");
+                this.setAction(420);
+                break;
+            
+            case 430:
+                this.deleteAction(0);
+                this.deleteAction(1);
+                this.deleteAction(2);
+                this.deleteAction(3);
+                player.clearing.unlocked = false;
+                game.updateHeader = true;
+                document.getElementById("inventory").style.opacity = 0;
+                this.setTimer("story", 2500, 440);
+                break;
+            case 440:
+                document.getElementById("lightTab").style.opacity = 1;
+                game.updateHeader = true;
+                this.setTimer("story", 2500, 450);
+                break;
+            case 450:
+                this.addStory("A loud thud sounds from outside.", true);
+                this.setTimer("story", 2500, 460);
+                break;
+            case 460:
+                this.addStory("I must stay quiet.", true);
+                this.setTimer("story", 2500, 470);
+                break;
+            case 470:
+                this.addStory(" ", true);
+                this.setTimer("story", 2500, 471);
+                break;
+            case 471:
+                this.addStory(" ", true);
+                this.setTimer("story", 2500, 472);
+                break;
+            case 472:
+                this.addStory(" ", true);
+                this.setTimer("story", 2500, 473);
+                break;
+            case 473:
+                this.addStory(" ", true);
+                this.setTimer("story", 2500, 480);
+                break;
+            case 480:
+                this.addStory("Screams sound from the other tents.", true);
+                this.setTimer("story", 2500, 490);
+                break;
+            case 490:
+                this.addStory("A large shadow passes the tent wall.", true);
+                this.setTimer("story", 2500, 500);
+                break;
+            case 500:
+                this.addStory(" ", true);
+                this.setTimer("story", 2500, 501);
+                break;
+            case 501:
+                this.addStory(" ", true);
+                this.setTimer("story", 2500, 510);
+                break;
+            case 510:
+                this.addStory("Silence.", true);
+                this.setTimer("story", 5000, 520);
+                break;
+            case 520:
+                this.addStory("Hours pass.", true);
+                this.setTimer("story", 5000, 530);
+                break;
+            case 530:
+                this.addStory("Nothing is left.", true);
+                this.setTimer("story", 7500, 531);
+                break;
+            case 531:
+                this.addStory(" ", true);
+                this.setTimer("story", 7500, 540);
+                break;
+            case 540:
+                this.addStory("The fire is out.", true);
+                this.setTimer("story", 7500, 550);
+                break;
+            case 550:
+                document.getElementById("tabHeader").style.opacity = 0;
+                document.getElementById("tabHeader").style.transition = "10000ms linear";
+                document.getElementById("settingsFooter").style.opacity = 0;
+                document.getElementById("settingsFooter").style.transition = "10000ms linear";
+                document.getElementById("lightTab").style.opacity = 0;
+                document.getElementById("lightTab").style.transition = "10000ms linear";
+                this.setTimer("story", 10000, 560);
+                break;
+            case 560:
+                Save.save();
+
+                clearInterval(game.loops.tick);
+                clearInterval(game.loops.save);
+
+                document.getElementById("body").innerHTML = `
+                    <div
+                        class = "column"
+                        id = "endgame"
+                    >
+                        <span
+                            id = "thanks"
+                        >Thank you for playing!
+                        </span>
+
+                        <span
+                            id = "time"
+                        >You beat the game in ` + Utils.formatTime(player.lastTick - player.firstTick) + `!
+                        </span>
+
+                        <br>
+
+                        <span
+                            id = "IGJ2021Text"
+                        >This game was made as part of the 2021 Incremental Game Jam.
+                        </span>
+                        <span class = "row">
+                            <a
+                                id = "IGJ2021Itch"
+                                href = "https://itch.io/jam/incremental-game-jam-2"
+                                target = "_blank"
+                            >Itch.io
+                            </a>
+                            <span style = "white-space: pre">    </span>
+                            <a
+                                id = "IGJ2021Discord"
+                                href = "https://discord.gg/NbKVeY4v5S"
+                                target = "_blank"
+                            >Discord
+                            </a>
+                        </span>
+
+                        <br>
+
+                        <span
+                            id = "IGJ2021Text"
+                        >Join my server to be notified of updates or to play my other games.
+                        </span>
+                        <span class = "row">
+                            <a
+                                id = "IGJ2021Discord"
+                                href = "https://discord.gg/YWUqwBSb9M"
+                                target = "_blank"
+                            >The Beacon Discord
+                            </a>
+                        </span>
+
+                        <br>
+
+                        <button
+                            id = "playAgain"
+                            onclick = "Save.reset()"
+                        >Play Again?
+                        </button>
+                    </div>
+                `;
+                break;
         }
 
     },
@@ -460,6 +688,9 @@ game.addTab("light", {
                 break;
             case 190:
                 data = {slot: 2, text: "Scavenge supplies.", time: 30000};
+                break;
+            case 420:
+                data = {slot: 3, text: "Sleep.", time: 10000};
                 break;
             default:
                 console.log("Invalid Action ID '" + action + "'");
@@ -580,26 +811,38 @@ game.addTab("light", {
                         }
                         break;
                     case 190:
-                        this.setTimer("function", 10000, function() {
-                            game.tabs.data.light.addStory([
-                                "The fire shines brightly in the distance.",
-                                "Signs of a recent encounter.",
-                                "Scrap metal strewn about.",
-                                "I'd best keep my guard up.",
-                                "Could use the seats as cloth.",
-                                "Surely more survivors can see the fire.",
-                            ][Math.floor(Math.random()*6)]);
-                        });
-                        this.setTimer("function", 20000, function() {
-                            game.tabs.data.light.addStory([
-                                "The snow crunches underfoot.",
-                                "Some nuts and bolts.",
-                                "Are those bite marks?",
-                                "A good find.",
-                                "The light of the fire is visible even here.",
-                                "The fire towers over the tree tops.",
-                            ][Math.floor(Math.random()*6)]);
-                        });
+                        if (player.light.state == 310) {
+                            this.setTimer("function", 20000, function() {
+                                game.tabs.data.light.addStory("A loud roar echos from the campsite.");
+                                game.tabs.data.light.setTimer("line", 5000, "I'd best head back quick.");
+                            });
+                        } else {
+                            this.setTimer("function", Math.floor(Math.random()*20000) + 10000, function() {
+                                game.tabs.data.light.addStory([
+                                    "The fire shines brightly in the distance.",
+                                    "Signs of a recent encounter.",
+                                    "Scrap metal strewn about.",
+                                    "I'd best keep my guard up.",
+                                    "Could use the seats as cloth.",
+                                    "Surely more survivors can see the fire.",
+                                    "The snow crunches underfoot.",
+                                    "Some nuts and bolts.",
+                                    "Are those bite marks?",
+                                    "A good find.",
+                                    "The light of the fire is visible even here.",
+                                    "The fire towers over the tree tops.",
+                                ][Math.floor(Math.random()*12)]);
+                            });
+                        }
+                        break;
+                    case 420:
+                        if (player.light.light == 3) {
+                            document.getElementById("lightTab").style.opacity = 0;
+                            this.setTimer("story", 5000, 430);
+                        } else {
+                            this.addStory("I should put some more wood on the fire.");
+                            button.flag = true;
+                        }
                         break;
                 }
                 break;
@@ -634,21 +877,30 @@ game.addTab("light", {
                         button.flag = 0;
                         break;
                     case 80:
-                        if (player.clearing.workers.firekeeper) button.state = -1;
+                        if (player.clearing.workers.firekeeper.amount) button.state = -1;
                         break;
                     case 90:
                         if (!button.flag) {
                             document.getElementById("lightTab").style.opacity = 1;
-                            this.deleteAction(2);
                             player.light.flameTime = player.lastTick + 30000;
                             this.setTimer("story", 3000, 100);
+                            this.deleteAction(2);
                         }
                         button.flag = false;
                         break;
                     case 190:
-                        this.addItem("metal", Math.floor(Math.random()*4)+1);
-                        this.addItem("cloth", Math.floor(Math.random()*4)+1);
+                        this.addItem("metal", Math.floor(Math.random()*2*Math.max(1, player.clearing.workers.explorer.amount))+1);
+                        this.addItem("cloth", Math.floor(Math.random()*4*Math.max(1, player.clearing.workers.explorer.amount))+1);
                         if (player.light.state == 190) this.setTimer("story", 1000, 200);
+                        if (player.light.state == 310 && player.clearing.workers.explorer.amount) this.setTimer("story", 1000, 320);
+                        if (player.light.state == 370 & player.clearing.buildings.wall.amount) this.setTimer("story", 1000, 380);
+                        break;
+                    case 420:
+                        if (!button.flag) {
+                            document.getElementById("lightTab").style.opacity = 1;
+                            player.light.flameTime = 0;
+                        }
+                        button.flag = false;
                         break;
                 }
                 break;
@@ -679,7 +931,7 @@ game.addTab("clearing", {
 
     id: "clearing",
     
-    buildingsOrder: ["houses", "storage"],
+    buildingsOrder: ["houses", "storage", "wall"],
     buildingsData: {
         houses: {
             names: ["Tents", "Huts", "Houses"],
@@ -704,6 +956,15 @@ game.addTab("clearing", {
                 mult = 1.5**player.clearing.buildings.storage.amount;
                 return {wood: Math.ceil(5*mult)};
             },
+        },
+        wall: {
+            names: ["Wall"],
+            desc() { return "Avoid more encounters.<br>" + Utils.formatCost(this.cost()); },
+            time: 30000,
+            cost() {
+                mult = 1.5**player.clearing.buildings.wall.amount;
+                return {wood: Math.ceil(10*mult**2), metal: Math.ceil(10*mult)};
+            }
         }
     },
 
@@ -732,8 +993,8 @@ game.addTab("clearing", {
                 amount: 0,
             };
         }
-        workers.gatherer = true;
-        workers.firekeeper = true;
+        workers.gatherer.unlocked = true;
+        workers.firekeeper.unlocked = true;
 
         return {
             unlocked: false,
@@ -779,9 +1040,14 @@ game.addTab("clearing", {
 
         let i;
         let timer;
+        let peopleTimer;
 
+        if (player.light.state >= 430) return;
+
+        peopleTimer = false;
         for (i = 0; i < player.clearing.timers.length; i ++) {
             timer = player.clearing.timers[i];
+            if (timer.type == "people") peopleTimer = true;
             if (player.lastTick > timer.time) {
                 switch (timer.type) {
                     case "story":
@@ -792,8 +1058,9 @@ game.addTab("clearing", {
                         game.tabs.data.light.addStory(timer.data);
                         break;
                     case "build":
-                        game.tabs.data.clearing.build(timer.data);
+                        this.build(timer.data);
                         break;
+                    case "people":
                     case "function":
                         if (typeof timer.data == "function") {
                             timer.data();
@@ -808,6 +1075,16 @@ game.addTab("clearing", {
         if (player.light.state == 160 && player.clearing.workers.gatherer.amount && player.clearing.workers.firekeeper.amount) {
             player.light.state = 161;
             this.setTimer("story", 1500, 170);
+        }
+
+        if (player.light.state >= 340 && 2**player.clearing.buildings.houses.tier*2*player.clearing.buildings.houses.amount > this.totalWorkers() && !peopleTimer) {
+            this.setTimer("people", Math.floor(Math.random()*60000)+30000, function () {
+                game.tabs.data.light.setTimer("line", 0, [
+                    "More survivors have located the light.",
+                    "The light has guided more survivors.",
+                ][Math.floor(Math.random()*2)]);
+                player.clearing.workers.free += Math.floor(Math.random()*2) + 1;
+            });
         }
 
     },
@@ -827,7 +1104,7 @@ game.addTab("clearing", {
                     <button
                         class = "building"
                         id = "` + building + `B"
-                        onclick = "game.tabs.data.clearing.build('` + building + `')"
+                        onclick = "game.tabs.data.clearing.build('` + building + `', false, true)"
                     >
                         <span
                             class = "buildingText"
@@ -949,18 +1226,17 @@ game.addTab("clearing", {
 
     },
 
-    build(building, force = false) {
+    build(building, force = false, clicked = false) {
 
         let button, fill;
         let cost, item;
 
-        if (force) {
-            player.clearing.buildings[building].amount += 1;
-            return;
-        }
-
         button = document.getElementById(building + "B");
         fill = document.getElementById(building + "F");
+
+        if (force) {
+            button = {state: 3}
+        }
 
         if (!button || !fill) return;
 
@@ -969,7 +1245,7 @@ game.addTab("clearing", {
             default:
                 button.state = 0;
             case 0:
-                button.disabled = true;
+                fill.disabled = true;
                 fill.style.transition = this.buildingsData[building].time + "ms linear";
                 fill.style.width = "calc(100% + 4px)";
                 this.setTimer("build", 0, building);
@@ -982,7 +1258,7 @@ game.addTab("clearing", {
                 this.setTimer("build", 500, building);
                 break;
             case 4:
-                button.disabled = false;
+                fill.disabled = false;
                 break;
 
             case 1:
@@ -998,7 +1274,8 @@ game.addTab("clearing", {
                 if (player.light.state == 260 && building == "houses") player.light.state += 1;
 
                 if (player.light.state == 280 && building == "storage") player.light.state += 1;
-                else if (player.light.state == 281 && building == "storage") console.log("A");
+                else if (player.light.state == 281 && building == "storage") game.tabs.data.light.setTimer("story", 250, 290);
+                else if (player.light.state == 400 && building == "wall") game.tabs.data.light.setTimer("story", 250, 410);
                 break;
 
         }
@@ -1027,12 +1304,6 @@ game.addTab("clearing", {
         
         player.clearing.workers.free -= 1;
         player.clearing.workers[worker].amount += 1;
-
-        if (worker == "firekeeper" && document.getElementById("80A").state == 0) {
-            game.tabs.data.light.setTimer("doAction", 0, 80);
-        } else if (worker == "gatherer" && document.getElementById("50A").state == 0) {
-            game.tabs.data.light.setTimer("doAction", 0, 50);
-        }
 
     },
 
