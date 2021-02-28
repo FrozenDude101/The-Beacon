@@ -836,13 +836,8 @@ game.addTab("light", {
                         }
                         break;
                     case 420:
-                        if (player.light.light != 0) {
-                            document.getElementById("lightTab").style.opacity = 0;
-                            this.setTimer("story", 5000, 430);
-                        } else {
-                            this.addStory("I should put some more wood on the fire.");
-                            button.flag = true;
-                        }
+                        document.getElementById("lightTab").style.opacity = 0;
+                        this.setTimer("story", 5000, 430);
                         break;
                 }
                 break;
@@ -896,11 +891,8 @@ game.addTab("light", {
                         if (player.light.state == 370 & player.clearing.buildings.wall.amount) this.setTimer("story", 1000, 380);
                         break;
                     case 420:
-                        if (!button.flag) {
-                            document.getElementById("lightTab").style.opacity = 1;
-                            player.light.flameTime = 0;
-                        }
-                        button.flag = false;
+                        document.getElementById("lightTab").style.opacity = 1;
+                        player.light.flameTime = 0;
                         break;
                 }
                 break;
