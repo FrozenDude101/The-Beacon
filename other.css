@@ -1,3 +1,4 @@
+#mobile,
 #endgame {
 
     height: 15em;
@@ -11,6 +12,7 @@
 
 }
 
+#mobile span,
 #endgame span {
 
     text-align: center;
@@ -33,6 +35,7 @@
 
 }
 
+#continue,
 #playAgain {
 
     margin: 0.25em;
@@ -54,7 +57,7 @@
 
 }
 
-#endgame span a,
+#continue:hover,
 #playAgain:hover {
 
     border-color: var(--text-color);

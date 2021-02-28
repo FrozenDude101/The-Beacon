@@ -27,6 +27,8 @@ class Save {
     static reset() {
 
         if (!confirm("Are you sure you want to reset your save? This cannot be undone.")) return;
+        clearInterval(game.loops.tick);
+        clearInterval(game.loops.save);
         player = Save.getStartPlayer();
         game.load();
 
@@ -44,6 +46,8 @@ class Save {
             activeTab: "light",
 
             theme: 0,
+
+            mobile: false,
 
             firstTick: Date.now(),
             lastTick: Date.now(),

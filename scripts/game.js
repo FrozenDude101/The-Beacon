@@ -102,8 +102,41 @@ class Game {
 
         this.loaded = false;
 
-        this.createLoops();
         this.changeTheme();
+
+        let compStyle = getComputedStyle(document.getElementById("body"));
+
+        if (!player.mobile && parseFloat(compStyle.fontSize)*48 > parseFloat(compStyle.width)) {
+            document.getElementById("body").innerHTML = `
+                <div
+                    class = "column"
+                    id = "mobile"
+                >
+                    <span
+                        id = "disclaimer"
+                    >This game is not designed for mobile devices.
+                    </span>
+
+                    <br>
+
+                    <span
+                        id = "disclaimer"
+                    >There is no gurantee all the content will be accessible.
+                    </span>
+
+                    <br>
+
+                    <button
+                        id = "continue"
+                        onclick = "player.mobile = true; game.load();"
+                    >Continue Anyway?
+                    </button>
+                </div>
+            `;
+            return;
+        }
+
+        this.createLoops();
 
         document.getElementById("body").innerHTML = `
             <header
