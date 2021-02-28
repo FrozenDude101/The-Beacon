@@ -836,7 +836,7 @@ game.addTab("light", {
                         }
                         break;
                     case 420:
-                        if (player.light.light == 3) {
+                        if (player.light.light != 0) {
                             document.getElementById("lightTab").style.opacity = 0;
                             this.setTimer("story", 5000, 430);
                         } else {
@@ -1239,6 +1239,7 @@ game.addTab("clearing", {
         }
 
         if (!button || !fill) return;
+        if (fill.disabled && clicked) return;
 
         switch (button.state) {
 
@@ -1270,11 +1271,14 @@ game.addTab("clearing", {
 
             case 3:
                 player.clearing.buildings[building].amount += 1;
-                if (player.light.state == 220 && building == "houses") game.tabs.data.light.setTimer("story", 2500, 230);
-                if (player.light.state == 260 && building == "houses") player.light.state += 1;
 
-                if (player.light.state == 280 && building == "storage") player.light.state += 1;
+                if (player.light.state == 220 && building == "houses") game.tabs.data.light.setTimer("story", 2500, 230);
+                else if (player.light.state == 260 && building == "houses") player.light.state += 1;
+
+                else if (player.light.state == 280 && building == "storage") player.light.state += 1;
                 else if (player.light.state == 281 && building == "storage") game.tabs.data.light.setTimer("story", 250, 290);
+                else if (player.clearing.buildings.storage.amount == 7 && building == "storage") game.tabs.data.light.setTimer("line", 250, "There's no more room even for storage boxes.");
+
                 else if (player.light.state == 400 && building == "wall") game.tabs.data.light.setTimer("story", 250, 410);
                 break;
 
