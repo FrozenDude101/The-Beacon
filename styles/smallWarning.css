@@ -1,0 +1,57 @@
+#smallWarningDiv {
+
+    justify-content: space-around;
+
+    height: 13rem;
+    width: 13rem;
+
+    border-radius: 2rem;
+    padding: 1rem;
+
+    background: var(--accent-1);
+
+}
+
+#smallWarningTitle {
+
+    font-size: 1.5rem;
+
+}
+
+#smallWarningInvite {
+
+    border-bottom: 2px solid transparent;
+    border-radius: 0.5rem;
+    padding: 0rem 0.25rem;
+
+    text-decoration: none;
+
+    transition: 500ms linear;
+
+}
+
+#smallWarningInvite:hover {
+
+    border-color: var(--text-colour);
+
+}
+
+#smallWarningButton {
+
+    border-bottom: 2px solid transparent;
+    border-radius: 0.5rem;
+    padding: 0rem 0.5rem;
+
+    background: transparent;
+
+    font-size: 1.5rem;
+
+    transition: 500ms linear;
+
+}
+
+#smallWarningButton:hover {
+
+    border-color: var(--text-colour);
+
+}

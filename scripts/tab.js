@@ -1,38 +1,37 @@
-class Tab {
+class Tab extends Template {
 
-    startData = {};
+    constructor(data) {
 
-    constructor(args = {}) {
+        super();
 
-        let attr;
-
-        for (attr in args) {
-            switch (attr) {
-                default:
-                    this.setValue(attr, args[attr]);
-            }
+        for (let item in data) {
+            this.setValue(item, data[item]);
         }
 
     }
 
-    setValue(attr, value, func = false) {
+    name() {
 
-        if (func) {
-            this[attr] = function() { return value; };
-        } else {
-            this[attr] = value;
-        }
+        return this.id;
 
     }
 
-    setTimer(type, time, data) {
+    startData() {
 
-        player[this.id].timers.push({
-            type: type,
-            time: player.lastTick + time,
-            data: data,
-        })
+        return {
+            unlocked: false,
+        };
 
     }
 
-}   
+    load() {}
+
+    createDisplay() {
+
+        return "";
+
+    }
+
+    update(diff) {}
+
+}

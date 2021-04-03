@@ -1,0 +1,116 @@
+.light:not(:last-child) {
+
+    margin-bottom: 1rem;
+
+}
+
+#lightStory {
+
+    flex-direction: column-reverse;
+    justify-content: flex-end;
+
+    position: relative;
+
+    height: 100%;
+
+}
+
+.lightLine {
+
+    padding: 0.25rem;
+
+}
+
+#lightActions {
+
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-content: space-between;
+
+    width: 100%;
+
+}
+
+.lightAction {
+
+    flex-grow: 1;
+
+    position: relative;
+
+    height: 2rem;
+    width: 45%;
+    
+    transition: 500ms ease-in-out;
+
+}
+
+.lightAction:nth-child(-n+2) {
+
+    margin-bottom: 0.5rem;
+
+}
+
+.lightAction:nth-child(2n-1) {
+
+    margin-right: 0.5rem;
+
+}
+
+.lightActionText {
+
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1;
+
+    height: 100%;
+    width: 100%;
+
+    border: 2px solid var(--text-colour);
+    border-radius: 0.5rem;
+
+    background: transparent;
+
+    transition: 500ms ease-in-out;
+
+}
+
+.lightActionFill {
+
+    position: absolute;
+    top: 0;
+    left: 0;
+
+    height: 100%;
+    width: 0%;
+
+    border-radius: 0.5rem;
+
+    background: var(--accent-1);
+
+}
+
+#lightItems {
+
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    align-items: flex-start;
+
+    max-height: 8rem;
+    height: 8rem;
+    width: 100%;
+
+}
+
+.lightItem {
+
+    height: 1.5rem;
+    width: 50%;
+
+    padding: 0.25rem;
+
+    text-align: left;
+
+    transition: 500ms ease-in-out;
+
+}

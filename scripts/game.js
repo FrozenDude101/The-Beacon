@@ -1,303 +1,122 @@
 var game;
 
 class Game {
+    // Represents an instance of the game.
+    // Replaced whenever a new save is loaded.
 
-    tabs = {
-        order: [],
-        data: {},
-    };
-    themes = {
-        order: [],
-        data: {},
-    };
-    loops = {};
+    static tabs = [];
 
-    unlocked = [];
+    display;
 
-    updateHeader = true;
-    updateFooter = true;
+    lastTick = Date.now();
+    time = [];
 
-    loaded = false;
-    paused = false;
+    tickIntervalID;
+    saveIntervalID;
 
-    footerContent = [
-        {
-            name: "save",
-            type: "button",
-            text: "Export",
-            func: "Save.save",
-        },
-        {
-            name: "load",
-            type: "button",
-            text: "Import",
-            func: "Save.load",
-        },
-        {
-            name: "reset",
-            type: "button",
-            text: "Reset",
-            func: "Save.reset",
-        },
-        {
-            name: "tickInterval",
-            type: "expand",
-            text() {
-                return "Target: " + Math.ceil(1000/player.tickInterval) + " TPS";
-            },
-            components: [
-                {
-                    name: "",
-                    type: "slider",
-                    range: [5, 30],
-                    func: "game.setTickInterval",
-                    value() {
-                        return Math.ceil(1000/player.tickInterval);
-                    },
-                },
-            ],
-        },
-        {
-            name: "saveInterval",
-            type: "expand",
-            text() {
-                return (player.saveInterval == 0 ? "Autosave (Off)" : "Autosave every " + Math.ceil(player.saveInterval/1000) + "s");
-            },
-            components: [
-                {
-                    name: "",
-                    type: "slider",
-                    range: [0, 10],
-                    func: "game.setSaveInterval",
-                    value() {
-                        return Math.ceil(player.saveInterval/1000);
-                    },
-                },
-            ],
-        },
-        {
-            name: "theme",
-            type: "button",
-            text: "Change Theme",
-            func: "game.nextTheme",
-        },
-        {
-            name: "discordLink",
-            type: "link",
-            text: "IGJ 2021 Discord",
-            link: "https://discord.gg/NbKVeY4v5S",
-        },
-        {
-            name: "discordLink2",
-            type: "link",
-            text: "The Beacon Discord",
-            link: "https://discord.gg/YWUqwBSb9M",
-        },
-    ];
+    constructor() {
 
-    // When a save is loaded.
+        this.display = new Display();
+        
+    }
+
     load() {
 
-        let tab;
+        this.setLoops();
 
-        this.loaded = false;
-
-        this.changeTheme();
-
-        let compStyle = getComputedStyle(document.getElementById("body"));
-
-        if (!player.mobile && parseFloat(compStyle.fontSize)*48 > parseFloat(compStyle.width)) {
-            document.getElementById("body").innerHTML = `
-                <div
-                    class = "column"
-                    id = "mobile"
-                >
-                    <span
-                        id = "disclaimer"
-                    >This game is not designed for mobile devices.
-                    </span>
-
-                    <br>
-
-                    <span
-                        id = "disclaimer"
-                    >There is no gurantee all the content will be accessible.
-                    </span>
-
-                    <br>
-
-                    <button
-                        id = "continue"
-                        onclick = "player.mobile = true; game.load();"
-                    >Continue Anyway?
-                    </button>
-                </div>
-            `;
-            return;
+        for (let tab of Game.tabs) {
+            Game[tab].load();
         }
 
-        this.createLoops();
-
-        document.getElementById("body").innerHTML = `
-            <header
-                class = "row"
-                id = "tabHeader"
-            ></header>
-            <main
-                id = "content"
-            ></main>
-            <footer
-                class = "row"
-                id = "settingsFooter">
-            </footer>
-        `;
-
-        for (tab of this.tabs.order) {
-            document.getElementById("content").innerHTML += this.tabs.data[tab].generateHTML();
-        }
-
-        Display.update(true);
-
-        this.setActiveTab();
-
-        for (tab of this.tabs.order) {
-            this.tabs.data[tab].onLoad();
-        }
-
-        this.loaded = true;
-    }
-
-    // Resets/Creates the save and main loops.
-    createLoops() {
-
-        clearInterval(this.loops.tick);
-        clearInterval(this.loops.save);
-
-        this.loops.tick = setInterval(Game.loop, player.tickInterval);
-        this.loops.save = (player.saveInterval ? setInterval(Save.save, player.saveInterval) : null);
+        this.display.update();
 
     }
 
-    // The main loop, called every tick.
-    static loop() {
+    static addTab(id, data) {
 
-        let diff;
-        let tab;
+        this.tabs.push(id);
+        data.id = id;
+        this[id] = new Tab(data);
 
-        diff = (Date.now() - player.lastTick)/1000;
+    }
 
-        if (game.paused) return;
+    changeActiveTab(tab) {
 
-        Display.update();
+        player.activeTab = tab;
+        this.display.update();
 
-        for (tab of game.tabs.order) {
-            if (!document.getElementById(tab + "TabButton")) continue;
-            if (player[tab].highlight && player[tab].unlocked && tab != player.activeTab) {
-                document.getElementById(tab + "TabButton").style.textShadow = "0em 0em 1em var(--text-color)";
-            } else if (player[tab].unlocked) {
-                player[tab].highlight = false;
-                document.getElementById(tab + "TabButton").style.textShadow = "";
-            }
-            game.tabs.data[tab].update(diff);
-        }
+    }
+
+    time() {
+
+        let time = player.timeElapsed + 480000;
         
-        player.lastTick = Date.now();
+        return [
+            Math.ceil(time / 720000),
+            time % 720000,
+        ];
 
     }
-
+    
     setTickInterval(value) {
 
-        player.tickInterval = 1000/value;
-        document.getElementById("tickInterval").innerHTML = "Target: " + Math.floor(value) + " TPS";
-        this.createLoops();
+        player.tickInterval = 1000 / value;
+        this.setLoops("tick");
+        this.display.update();
 
     }
 
     setSaveInterval(value) {
 
-        player.saveInterval = value*1000;
-        document.getElementById("saveInterval").innerHTML = (player.saveInterval == 0 ? "Autosave (Off)" : "Autosave every " + Math.ceil(player.saveInterval/1000) + "s");
-        this.createLoops();
+        player.saveInterval = value * 1000;
+        this.setLoops("save");
+        this.display.update();
 
     }
 
-    // Adds a theme.
-    addTheme(data) {
+    setLoops(loop) {
 
-        this.themes.order.push(data.name);
-        this.themes.data[data.name] = data;
+        switch (loop) {
 
-    }
+            default:
+            case "tick":
+                if (this.tickIntervalID) clearInterval(this.tickIntervalID);
+                game.lastTick = Date.now();
+                if (player.tickInterval != Infinity) game.tickIntervalID = setInterval(game.loop, player.tickInterval);
+                if (loop) break;
+            case "save":
+                if (this.saveIntervalID) clearInterval(this.saveIntervalID);
+                if (player.saveInterval) game.saveIntervalID = setInterval(Save.save, player.saveInterval);
+                if (loop) break;
 
-    // Updates values to the current theme.
-    changeTheme() {
-
-        let root;
-        let theme;
-
-        root = document.documentElement;
-        theme = this.themes.data[this.themes.order[player.theme]];
-
-        for (let value in theme) {
-            root.style.setProperty(value, theme[value]);
         }
 
     }
 
-    // Changes the theme to the next theme.
-    nextTheme() {
-        
-        player.theme += 1;
-        player.theme %= game.themes.order.length;
-        this.changeTheme();
-        this.updateFooter = true;
+    loop(diff = Date.now() - game.lastTick) {
+
+        game.display.update(diff);
+
+        for (let tab of Game.tabs) {
+            Game[tab].update(diff);
+        }
+
+        player.timeElapsed += diff;
+        game.lastTick = Date.now();
+
+        let time = player.timeElapsed + 480000;
+        game.time = [
+            Math.ceil(time / 720000),
+            time % 720000,
+        ];
 
     }
 
-    // Adds a tab.
-    addTab(id, data) {
+    close() {
 
-        this.tabs.order.push(id);
-        this.tabs.data[id] = new Tab(data);
-        player = Utils.mergeObjects(Save.getStartPlayer(), player);
-        if (this.loaded) {
-            document.getElementById("body").innerHTML += this.tabs.data[id].generateHTML();
-        }
-
-    }
-
-    // Sets the active tab.
-    setActiveTab(tab = player.activeTab) {
-
-        let activeTab;
-        let element;
-        
-        activeTab = document.getElementsByClassName("activeTabButton")[0];
-        if (activeTab) activeTab.classList.remove("activeTabButton");
-        activeTab = document.getElementById(tab + "TabButton");
-        if (activeTab) activeTab.classList.add("activeTabButton");
-
-        element = document.getElementById(player.activeTab + "Tab");
-        if (element) {
-            element.style.zIndex = 0;
-            element.style.opacity = 0;
-            element.style.transition = "1000ms ease-in-out";
-            element.style.left = "-100vw";
-        }
-        element = document.getElementById(tab + "Tab");
-        if (element) {
-            element.style.zIndex = 1;
-            element.style.opacity = 1;
-            element.style.transition = "1000ms ease-in-out";
-            element.style.left = "0px";
-        }
-
-        player.activeTab = tab;
-
-        this.updateMain = true;
+        if (this.tickIntervalID) clearInterval(this.tickIntervalID);
+        if (this.saveIntervalID) clearInterval(this.saveIntervalID);
 
     }
 
 }
-
-game = new Game();

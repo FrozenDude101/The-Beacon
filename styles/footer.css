@@ -1,0 +1,244 @@
+@media screen and (max-width: 719px) {
+
+    #settingsColumn {
+
+        position: absolute;
+        top: 0;
+        left: 0;
+
+        width: 100%;
+    
+        padding: 0.25rem 0.5rem 0 0.5rem;
+    
+        background: var(--accent-1);
+    
+        transition: 500ms ease-in-out;
+    
+    }
+
+    #settingsColumn > * {
+
+        margin-bottom: 0.5rem;
+
+    }
+    
+    #settingsButton {
+
+        padding: 0 0.5rem;
+    
+        background: transparent;
+    
+        font-size: 1.5rem;
+    
+    }
+    
+    #settingsArrow {
+    
+        display: inline-block;
+    
+        margin-left: 0.5rem;
+    
+        font-size: 1rem;
+    
+        transition: 500ms ease-in-out;
+    
+    }
+    
+    .settingsRow {
+    
+        justify-content: space-between;
+
+        width: 100%;
+    
+        margin-bottom: 0.5rem;
+    
+    }
+    
+    .settingsButton {
+
+        padding: 0rem 0.25rem;
+    
+        background: transparent;
+    
+        font-size: 1.5rem;
+    
+    }
+    
+    .settingsColumn {
+
+        width: 100%;
+    
+        font-size: 1.5rem;
+    
+    }
+    
+    .settingsSlider{
+
+        -webkit-appearance: none;
+
+        background: transparent;
+        
+    }
+      
+    .settingsSlider:focus {
+
+        outline: none;
+    
+    }
+
+    .settingsSlider::-webkit-slider-thumb {
+
+        -webkit-appearance: none;
+
+        height: 1.5rem;
+        width: 1.5rem;
+
+        border-radius: 1rem;
+
+        background: var(--background-colour);
+
+        cursor: pointer;
+
+    }
+    
+    .settingsSlider[type=range]::-webkit-slider-runnable-track {
+
+        height: 1.5rem;
+
+        border-radius: 1rem;
+
+        background: var(--accent-2);
+
+    }
+      
+    .settingsSlider[type=range]::-moz-range-track {
+
+        height: 1.5rem;
+
+        border-radius: 1rem;
+
+        background: var(--accent-2);
+        
+    }
+
+}
+
+@media screen and (min-width: 720px) {
+
+    #settingsRow {
+
+        justify-content: flex-end;
+        align-items: flex-start;
+
+    }
+
+    .settingsColumn {
+
+        justify-content: center;
+        align-items: center;
+
+        position: relative;
+        top: 0;
+
+        margin-left: 2rem;
+        border-radius: 1rem;
+        padding: 0.25rem 0.5rem;
+
+        background: var(--accent-1);
+
+        transition: 500ms ease-in-out;
+
+    }
+
+    .settingsColumn > * {
+
+        margin-bottom: 0.5rem;
+
+    }
+
+    .settingsText,
+    .settingsButton {
+
+        padding: 0 0.5rem;
+    
+        font-size: 1.5rem;
+
+    }
+
+    .settingsSubColumn {
+
+        padding: 0 0.5rem;
+
+    }
+      
+    .settingsButton {
+
+        border-bottom: 3px solid transparent;
+        border-radius: 0.5rem;
+    
+        background: transparent;
+
+        text-decoration: none;
+
+        transition: 500ms ease-in-out;
+    
+    }
+
+    .settingsButton:hover {
+
+        border-color: var(--text-colour);
+
+    }
+    
+    .settingsSlider{
+
+        -webkit-appearance: none;
+
+        width: 12.5rem;
+
+        background: transparent;
+        
+    }
+      
+    .settingsSlider:focus {
+
+        outline: none;
+    
+    }
+
+    .settingsSlider::-webkit-slider-thumb {
+
+        -webkit-appearance: none;
+
+        height: 1.5rem;
+        width: 1.5rem;
+
+        border-radius: 1rem;
+
+        background: var(--background-colour);
+
+        cursor: pointer;
+
+    }
+    
+    .settingsSlider::-webkit-slider-runnable-track {
+
+        height: 1.5rem;
+
+        border-radius: 1rem;
+
+        background: var(--accent-2);
+
+    }
+      
+    .settingsSlider::-moz-range-track {
+
+        height: 1.5rem;
+
+        border-radius: 1rem;
+
+        background: var(--accent-2);
+
+    }
+
+}

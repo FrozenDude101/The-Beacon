@@ -1,140 +1,124 @@
 class Utils {
+    // Utility functions for use all across the code.
 
-    static cloneObject(obj) {
+    static cloneObject(object) {
+        // Uses recursion to deep clone an object.
+        // object -> Object, the object to be cloned.
 
-        let retObj;
-        let attr;
-
-        retObj = {};
-        for (attr in obj) {
-            if (Array.isArray(obj[attr])) {
-                retObj[attr] = Utils.cloneArray(obj[attr]);
-            } else if (typeof obj[attr] == "object") {
-                retObj[attr] = Utils.cloneObject(obj[attr]);
+        let ret = {};
+        for (let key in object) {
+            if (Array.isArray(object[key])) {
+                ret[key] = Utils.cloneArray(object[key]);
+            } else if (typeof object[key] == "object") {
+                ret[key] = Utils.cloneObject(object[key]);
             } else {
-                retObj[attr] = obj[attr];
-            }
+                ret[key] = object[key];
+            };
         }
-
-        return retObj;
+        return ret;
 
     }
 
-    static cloneArray(arr) {
+    static cloneArray(array) {
+        // Uses recursion to deep clone an array.
+        // array -> Array, the array to be cloned.
 
-        let retArr;
-        let item;
-
-        retArr = [];
-        for (item of arr) {
+        let ret = [];
+        for (let item of array) {
             if (Array.isArray(item)) {
-                retArr.push(Utils.cloneArray(item));
+                ret.push(Utils.cloneArray(item));
             } else if (typeof item == "object") {
-                retArr.push(Utils.cloneObject(item));
+                ret.push(Utils.cloneObject(item));
             } else {
-                retArr.push(item);
+                ret.push(item);
+            };
+        }
+        return ret;
+
+    }
+
+    static mergeObjects(object1, object2) {
+        // Uses recursion to merge two objects.
+        // Arrays are not merged.
+        // object1 -> Object, the default object, takes precedence.
+        // object2 -> Object, the object being merged.
+
+        let ret = {};
+        for (let key in object1) {
+            if (object2[key] != undefined &&
+                (!Array.isArray(object1[key]) && typeof object1[key] == "object") &&
+                (!Array.isArray(object2[key]) && typeof object2[key] == "object")) {
+                    // Only merge if both objects have a non-Array Object at the key.
+                    ret[key] = Utils.mergeObjects(object1[key], object2[key]);
+            } else {
+                ret[key] = object1[key];
             }
         }
-
-        return retArr;
-
-    }
-
-    static mergeObjects(obj1, obj2) {
-
-        let obj;
-        let attr;
-        let usedAttr;
-
-        obj = {};
-        usedAttr = [];
-
-        for (attr in obj1) {
-            if (obj2 != undefined && obj2[attr] != undefined) {
-                usedAttr.push(attr);
-                if (Array.isArray(obj1[attr]) && Array.isArray(obj2[attr])) {
-                    obj[attr] = obj2[attr];
-                } else if (typeof obj1[attr] == "object" && typeof obj2[attr] == "object") {
-                    obj[attr] = Utils.mergeObjects(obj1[attr], obj2[attr]);
-                } else {
-                    obj[attr] = obj2[attr];
-                }
+        for (let key in object2) {
+            if (object1[key] != undefined) {
+                // If the key exists in object1, it has been dealt with in the previous for loop.
+                continue;
             } else {
-                obj[attr] = obj1[attr];
+                ret[key] = object2[key];
             }
         }
-        
-        for (let attr in obj2) {
-            if (usedAttr.includes(attr)) continue;
-            obj[attr] = obj2[attr];
+        return Utils.cloneObject(ret);
+        // Clones the object to unlink all objects and arrays.
+
+    }
+
+    static formatClock(ms, precision = 6, analogue = false) {
+
+        ms = ms % 86400000;
+
+        let hours = Math.floor(ms / 3600000);
+        ms -= hours * 3600000;
+
+        let minutes = Math.floor(ms / 60000);
+        ms -= minutes * 60000;
+
+        let seconds = Math.floor(ms / 1000);
+
+        let post = "";
+        if (analogue) {
+            post = " " + (hours >= 12 ? "PM" : "AM");
+            hours %= 12;
+            if (post == " PM" && hours == 0) hours = 12;
         }
 
-        return obj;
+        switch (precision) {
 
-    }
+            case 0:
+                hours = hours.toString();
+                hours = "0".repeat(Math.max(0, 2 - hours.length)) + hours;
+                return hours + ":00" + post;
+            case 1:
+                minutes = Math.floor(minutes / 30) * 30;
+            case 2:
+                minutes = Math.floor(minutes / 10) * 10;
+            case 3:
+                hours = hours.toString();
+                hours = "0".repeat(Math.max(0, 2 - hours.length)) + hours;
+                minutes = minutes.toString();
+                minutes = "0".repeat(Math.max(0, 2 - minutes.length)) + minutes;
+                return hours + ":" + minutes + post;
+            case 4:
+                seconds = Math.floor(seconds / 30) * 30;
+            case 5:
+                seconds = Math.floor(seconds / 10) * 10;
+            default:
+                hours = hours.toString();
+                hours = "0".repeat(Math.max(0, 2 - hours.length)) + hours;
+                minutes = minutes.toString();
+                minutes = "0".repeat(Math.max(0, 2 - minutes.length)) + minutes;
+                seconds = seconds.toString();
+                seconds = "0".repeat(Math.max(0, 2 - seconds.length)) + seconds;
+                return hours + ":" + minutes + ":" + seconds + post;
 
-    static mergeArrays(arr1, arr2) {
 
-        return arr1.concat(arr2);
 
-    }
-
-    static format(number) {
-
-        return number;
-
-    }
-
-    static toTitleCase(string) {
-
-        return string.charAt(0).toUpperCase() + string.slice(1);
-
-    }
-
-    static getValue(attr) {
-
-        if (typeof attr == "function") {
-            return attr();
-        }
-        return attr;
-
-    }
-
-    static getTabValue(tab, value, def) {
-
-        let attr;
-
-        attr = game.tabs.data[tab][value];
-        if (attr) {
-            return this.getValue(attr);
-        }
-        return def;
-
-    }
-
-    static formatCost(obj) {
-
-        let ret;
-        let attr;
-
-        ret = "";
-        for (attr in obj) {
-            if (!obj[attr]) continue;
-            ret += obj[attr] + " " + Utils.toTitleCase(attr) + ", ";
         }
 
-        return ret.slice(0, -2);
-
     }
-
-    static formatTime(s) {
-        s = s/1000;
-        if (s < 60) return  Math.floor(s) + "s"
-        else if (s < 3600) return Math.floor(s / 60) + "m " + Math.floor(s % 60) + "s"
-        else if (s < 86400) return Math.floor(s / 3600) + "h " + (Math.floor(s / 60) % 60) + "m " + Math.floor(s % 60) + "s"
-        else if (s < 31536000) return (Math.floor(s / 84600) % 365) + "d " + (Math.floor(s / 3600) % 24) + "h " + (Math.floor(s / 60) % 60) + "m " + Math.floor(s % 60) + "s"
-        else return Math.floor(s / 31536000) + "y " + (Math.floor(s / 84600) % 365) + "d " + (Math.floor(s / 3600) % 24) + "h " + (Math.floor(s / 60) % 60) + "m " + Math.floor(s % 60) + "s"
-    }
-    // Stolen from TMT.
 
 }

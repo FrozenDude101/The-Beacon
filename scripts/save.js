@@ -2,64 +2,84 @@ var player;
 
 class Save {
 
-    // Saves the player object.
     static save() {
+        // Saves the game.
 
-        localStorage.setItem("FD101/IGJ2021", JSON.stringify(player));
+        localStorage.setItem("FD101/TheBeacon", btoa(JSON.stringify(player)));
 
     }
 
-    // Loads the player object.
-    static load(data = JSON.parse(localStorage.getItem("FD101/IGJ2021"))) {
+    static load(data = localStorage.getItem("FD101/TheBeacon")) {
+        // Loads the game.
+        // data -> The data to be loaded.
+        //      -> If falsey, resets the save.
 
-        if (data == null) {
-            player = Save.getStartPlayer();
-        } else if (data.id == "FD101/IGJ2021" || confirm("This save does not appear to be for this game, are you sure you want to continue?")) {
-            player = Utils.mergeObjects(Save.getStartPlayer(), data);
-        } else if (player == undefined) {
-            player = Save.getStartPlayer();
+        if (data) {
+            player = JSON.parse(atob(data));
+            if (player.tickInterval == null) player.tickInterval = Infinity;
+            player = Utils.mergeObjects(player, Save.default());
+        } else {
+            player = Save.default();
         }
+
+        if (game) game.close();
+        game = new Game();
         game.load();
 
     }
 
-    // Resets the player object.
+    static import() {
+        // Imports the game.
+
+        let data = prompt("Paste in an exported game file.");
+        if (data) {
+            load(data);
+        }
+
+    }
+
+    static export() {
+        // Exports the game.
+
+        prompt("Here is your exported game file:", btoa(JSON.stringify(player)));
+
+    }
+
     static reset() {
+        // Resets the game.
 
-        if (!confirm("Are you sure you want to reset your save? This cannot be undone.")) return;
-        clearInterval(game.loops.tick);
-        clearInterval(game.loops.save);
-        player = Save.getStartPlayer();
-        game.load();
+        if (confirm("Are you sure you want to reset your save?\nThis cannot be undone.")) {
+            Save.load(null);
+        }
 
     }
 
-    // Gets the initial value of player.
-    static getStartPlayer() {
+    static default() {
+        // Returns the default save.
 
-        let player;
-        let tab;
+        let save = {
 
-        player = {
-            id: "FD101/IGJ2021",
+            startTick: Date.now(),
+            timeElapsed: 0,
 
             activeTab: "light",
 
-            theme: 0,
-
-            mobile: false,
-
-            firstTick: Date.now(),
-            lastTick: Date.now(),
-            tickInterval: 34,
+            skipSmallWarning: false,
+            
+            tickInterval: 1000/30,
             saveInterval: 10000,
+            
+            highQuality: true,
+            offlineProgress: true,
+            analogueTime: true,
+            
         };
 
-        for (tab of game.tabs.order) {
-            player[tab] = Utils.getValue(game.tabs.data[tab].startData);
+        for (let tab of Game.tabs) {
+            save[tab] = Game[tab].startData();
         }
 
-        return Utils.cloneObject(player);
+        return save;
 
     }
 
